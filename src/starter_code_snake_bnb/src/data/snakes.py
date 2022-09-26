@@ -2,7 +2,7 @@ import mongoengine
 import datetime
 
 
-class Snake:
+class Snake(mongoengine.Document):
     registered_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     species = mongoengine.StringField(required=True)
 
