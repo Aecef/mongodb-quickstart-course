@@ -64,7 +64,6 @@ def create_account():
 def log_into_account():
     print(' ****************** LOGIN **************** ')
 
-    # TODO: Get email
     email = input('What is your email? ').strip().lower()
     account = svc.find_account_by_email(email)
 
@@ -74,7 +73,6 @@ def log_into_account():
 
     state.active_account = account
     success_msg('Logged in successfully.')
-    # TODO: Find account in DB, set as logged in.
 
     print(" -------- NOT IMPLEMENTED -------- ")
 
@@ -82,11 +80,28 @@ def log_into_account():
 def register_cage():
     print(' ****************** REGISTER CAGE **************** ')
 
-    # TODO: Require an account
-    # TODO: Get info about cage
-    # TODO: Save cage to DB.
+    if not state.active_account:
+        error_msg('You must be logged in first to register a cage. ')
+        return
 
-    print(" -------- NOT IMPLEMENTED -------- ")
+    meters = input('How many square meters is the cage? ')
+    if not meters:
+        error_msg('Cancelled')
+        return
+
+    meters = float(meters)
+    carpeted = input('Is it carpeted [y, n]? ').lower().startswith('y')
+    has_toys= input('Does it have snake toys [y, n]? ').lower().startswith('y')
+    allow_dangerous = input('Can you host venomous snakes [y, n]? ').lower().startswith('y')
+    name = input('Give your cage a name: ')
+
+    # Register Cage in Data Layer
+    cage = svc.register_cage(
+        state.active_account, name, allow_dangerous, has_toys, carpeted, meters
+    )
+
+    state.reload_account()
+    success_msg(f'Registered new cage with id {cage.id}.')
 
 
 def list_cages(supress_header=False):
