@@ -1,7 +1,7 @@
 import mongoengine
 import datetime
 
-from bookings import Booking
+from src.starter_code_snake_bnb.src.data.bookings import Booking
 
 
 class Cage(mongoengine.Document):

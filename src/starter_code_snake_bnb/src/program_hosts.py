@@ -74,8 +74,6 @@ def log_into_account():
     state.active_account = account
     success_msg('Logged in successfully.')
 
-    print(" -------- NOT IMPLEMENTED -------- ")
-
 
 def register_cage():
     print(' ****************** REGISTER CAGE **************** ')
@@ -94,10 +92,11 @@ def register_cage():
     has_toys= input('Does it have snake toys [y, n]? ').lower().startswith('y')
     allow_dangerous = input('Can you host venomous snakes [y, n]? ').lower().startswith('y')
     name = input('Give your cage a name: ')
+    price = float(input('How much are you charging: '))
 
     # Register Cage in Data Layer
     cage = svc.register_cage(
-        state.active_account, name, allow_dangerous, has_toys, carpeted, meters
+        state.active_account, name, allow_dangerous, has_toys, carpeted, meters, price
     )
 
     state.reload_account()
@@ -109,7 +108,17 @@ def list_cages(supress_header=False):
         print(' ******************     Your cages     **************** ')
 
     # TODO: Require an account
+
+    if not state.active_account:
+        error_msg('You must login first to view cages.')
+        return
+
     # TODO: Get cages, list details
+
+    cages = svc.find_cages_for_user(state.active_account)
+    print(f'You have {len(cages)} cages.')
+    for c in cages:
+        print(f' * {c.name} is {c.square_meters} meters ')
 
     print(" -------- NOT IMPLEMENTED -------- ")
 

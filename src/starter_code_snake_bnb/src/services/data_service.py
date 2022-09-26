@@ -1,3 +1,5 @@
+from typing import List
+
 from src.starter_code_snake_bnb.src.data.cages import Cage
 from src.starter_code_snake_bnb.src.data.owners import Owner
 
@@ -18,7 +20,7 @@ def find_account_by_email(email: str) -> Owner:
     return owner
 
 
-def register_cage(active_account: Owner, name, allow_dangerous, has_toys, carpeted, meters) -> Cage:
+def register_cage(active_account: Owner, name, allow_dangerous, has_toys, carpeted, meters, price) -> Cage:
     cage = Cage()
 
     cage.name = name
@@ -26,6 +28,7 @@ def register_cage(active_account: Owner, name, allow_dangerous, has_toys, carpet
     cage.allow_dangerous_snakes = allow_dangerous
     cage.is_carpeted = carpeted
     cage.has_toys = has_toys
+    cage.price = price
 
     # Must call save before appending to make sure cage is actually a generated value
     cage.save()
@@ -36,3 +39,10 @@ def register_cage(active_account: Owner, name, allow_dangerous, has_toys, carpet
     account.save()
 
     return cage
+
+
+def find_cages_for_user(account: Owner) -> List[Cage]:
+    query = Cage.objects(id__in = account.cage_ids)
+    cages = list(query)
+
+    return cages
