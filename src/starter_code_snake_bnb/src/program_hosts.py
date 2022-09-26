@@ -65,6 +65,15 @@ def log_into_account():
     print(' ****************** LOGIN **************** ')
 
     # TODO: Get email
+    email = input('What is your email? ').strip().lower()
+    account = svc.find_account_by_email(email)
+
+    if not account:
+        error_msg(f'Could not find account with email {email}. ')
+        return
+
+    state.active_account = account
+    success_msg('Logged in successfully.')
     # TODO: Find account in DB, set as logged in.
 
     print(" -------- NOT IMPLEMENTED -------- ")
