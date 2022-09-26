@@ -2,4 +2,4 @@ import mongoengine
 
 
 def global_init():
-    mongoengine.register_connection(alias='core', name='smake_bnb')
+    mongoengine.register_connection(alias='core', name='snake_bnb')
