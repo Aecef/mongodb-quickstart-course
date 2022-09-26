@@ -1,4 +1,6 @@
-active_account = None
+from src.starter_code_snake_bnb.src.data.owners import Owner
+
+active_account: Owner = None
 
 
 def reload_account():
