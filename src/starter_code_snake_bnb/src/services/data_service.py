@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
 from typing import List
 
+from src.starter_code_snake_bnb.src.data.bookings import Booking
 from src.starter_code_snake_bnb.src.data.cages import Cage
 from src.starter_code_snake_bnb.src.data.owners import Owner
 
@@ -46,3 +48,19 @@ def find_cages_for_user(account: Owner) -> List[Cage]:
     cages = list(query)
 
     return cages
+
+
+def add_available_date(selected_cage: Cage, start_date: datetime, days: int) -> Cage:
+    booking = Booking()
+
+    booking.checked_in_date = start_date
+    booking.checked_out_date = start_date + timedelta(days=days)
+
+    cage = Cage.objects(id=selected_cage.id).first()
+    cage.bookings.append(booking)
+    cage.save()
+
+    return cage
+
+
+    return None
