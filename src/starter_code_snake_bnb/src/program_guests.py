@@ -1,3 +1,5 @@
+from dateutil import parser
+
 from infrastructure.switchlang import switch
 import program_hosts as hosts
 import infrastructure.state as state
@@ -84,15 +86,58 @@ def view_your_snakes():
             '' if s.is_venomous else 'not '
         ))
 
+
 def book_a_cage():
     print(' ****************** Book a cage **************** ')
-    # TODO: Require an account
-    # TODO: Verify they have a snake
-    # TODO: Get dates and select snake
-    # TODO: Find cages available across date range
-    # TODO: Let user select cage to book.
+    if not state.active_account:
+        hosts.error_msg('You must be logged in to book a cage.')
+        return
+    snakes = svc.get_snakes_for_user(state.active_account.id)
+    if not snakes:
+        hosts.error_msg('You need [a] snake registered to book a cage.')
+        return
+    print('Let\'s start by finding available cages. ')
+    start_text = input('Check-in Date [yyyy-mm-dd]: ')
+    if not start_text:
+        hosts.error_msg("Cancelled")
+        return
 
-    print(" -------- NOT IMPLEMENTED -------- ")
+    checkin = parser.parse(start_text)
+    checkout = parser.parse(input('Check-out Date [yyyy-mm-dd]: '))
+
+    if checkin >= checkout:
+        hosts.error_msg('Check-in must be before check-out')
+        return
+    print()
+
+    for idx, s in enumerate(snakes):
+        print('{} {} (length: {}, venomous: {})'.format(
+            idx+1,
+            s.name,
+            s.length,
+            'yes' if s.is_venomous else 'no'
+        ))
+
+    snake = snakes[int(input('Which snake would you like to book (number)')) - 1]
+    available_cages = svc.get_available_cages(checkin, checkout, snake)
+
+    print("There are {} cages available in that time.".format(len(available_cages)))
+    for idx, c in enumerate(available_cages):
+        print(" {}. {} with {}m carpeted: {}, has toys: {}.".format(
+            idx + 1,
+            c.name,
+            c.square_meters,
+            'yes' if c.is_carpeted else 'no',
+            'yes' if c.has_toys else 'no'))
+
+    if not available_cages:
+        hosts.error_msg("Sorry, no cages are available for that date.")
+        return
+
+    cage = available_cages[int(input('Which cage do you want to book (number)')) - 1]
+    svc.book_cage(state.active_account, snake, cage, checkin, checkout)
+
+    hosts.success_msg('Successfully booked {} for {} at ${}/night.'.format(cage.name, snake.name, cage.price))
 
 
 def view_bookings():

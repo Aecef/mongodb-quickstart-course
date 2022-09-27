@@ -66,9 +66,6 @@ def add_available_date(selected_cage: Cage, start_date: datetime, days: int) -> 
     return cage
 
 
-    return None
-
-
 def add_snake(account: Owner, name: str, is_venomous: bool, length: float, species: str) -> Snake:
     snake = Snake()
 
@@ -89,3 +86,37 @@ def get_snakes_for_user(user_id: bson.ObjectId) -> List[Snake]:
     owner = Owner.objects(id=user_id).first()
     snakes = Snake.objects(id__in=owner.snake_ids).all()
     return list(snakes)
+
+
+def get_available_cages(checkin: datetime, checkout: datetime, snake: Snake) -> List[Cage]:
+    min_size = snake.length / 4
+    query = Cage.objects() \
+        .filter(square_meters__gte=min_size)\
+        .filter(bookings__checked_in_date__lte=checkin) \
+        .filter(bookings__checked_out_date__gte=checkout)
+
+    if snake.is_venomous:
+        query = query.filter(allow_dangerous_snakes=True)
+
+    cages = query.order_by('price', '-square_meters')
+
+    final_cages = []
+    for c in cages:
+        for b in c.bookings:
+            if b.checked_in_date <= checkin and b.checked_out_date >= checkout and b.guest_snake_id is None:
+                final_cages.append(c)
+
+    return final_cages
+
+
+def book_cage(account: Owner, snake: Snake, cage: Cage, checkin, checkout):
+    booking: Booking = None
+    for b in cage.bookings:
+        if b.checked_in_date <= checkin and b.checked_out_date >= checkout and b.guest_snake_id is None:
+            booking = b
+            break
+    booking.guest_owner_id = account.id
+    booking.guest_snake_id = snake.id
+    booking.booked_date = datetime.now()
+
+    cage.save()
